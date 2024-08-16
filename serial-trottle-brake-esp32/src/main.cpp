@@ -11,6 +11,7 @@
 #define PIN_SERIAL_CNTRL_TO_ESP 14 // RX esp32 <- TX controller
 #define PIN_IN_ABRAKE 34           // Brake
 #define PIN_IN_ATHROTTLE 39        // Throttle
+#define PIN_IN_REVERSE 35          // Reverse keyswitch : allow for reverse spin
 
 // send orders every 40ms
 #define TIME_SEND 40
@@ -55,6 +56,7 @@ void setup()
 
   pinMode(PIN_IN_ATHROTTLE, INPUT);
   pinMode(PIN_IN_ABRAKE, INPUT);
+  pinMode(PIN_IN_REVERSE, INPUT);
 
   // do it twice to improve values
   uint16_t adcValue = 0;
