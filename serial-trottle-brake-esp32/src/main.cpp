@@ -32,10 +32,12 @@
 // Trottle
 uint16_t analogValueThrottleRaw = 0;
 uint16_t analogValueThrottleMinCalibRaw = 0;
+float driveCurr = 0.0;
 
 // Brake
 uint16_t analogValueBrakeRaw = 0;
 uint16_t analogValueBrakeMinCalibRaw = 0;
+float brakeCurr = 0.0;
 
 char print_buffer[500];
 
@@ -103,7 +105,7 @@ void loop(void)
   // Compute brake
   analogValueBrakeRaw = analogRead(PIN_IN_ABRAKE);
   analogValueBrakeRaw = constrain(analogValueBrakeRaw, analogValueBrakeMinCalibRaw, ANALOG_MAX_RAW);
-
+/*
   // The valueY is used to control the speed, where 127 is the middle = no current
   uint8_t value;
   if (PIN_IN_REVERSE==1) // reverse keyswitch engaged
@@ -124,6 +126,32 @@ void loop(void)
     else
       value = 127;
   }
+*/ 
+	if (PIN_IN_REVERSE==1) // reverse keyswitch engaged 
+	{
+		if (analogValueThrottleRaw > (analogValueThrottleMinCalibRaw + ANALOG_SAFETY_OFFSET)){ //reverse throttle 
+			driveCurr = map(analogValueThrottleRaw, analogValueThrottleMinCalibRaw + ANALOG_SAFETY_OFFSET, ANALOG_MAX_RAW, 0, -20); //modify if wrong
+		else
+			driveCurr = 0 ;
+
+		if (analogValueBrakeRaw > analogValueBrakeMinCalibRaw + ANALOG_SAFETY_OFFSET) // reverse brake
+			brakeCurr = map(analogValueBrakeRaw, analogValueBrakeMinCalibRaw + ANALOG_SAFETY_OFFSET, ANALOG_MAX_RAW, 0, 20);
+		else
+			brakeCurr = 0 ;
+	}
+	else
+	{
+		if (analogValueThrottleRaw > (analogValueThrottleMinCalibRaw + ANALOG_SAFETY_OFFSET)){ //reverse throttle 
+			driveCurr = map(analogValueThrottleRaw, analogValueThrottleMinCalibRaw + ANALOG_SAFETY_OFFSET, ANALOG_MAX_RAW, 0, 20); //modify if wrong
+		else
+			driveCurr = 0 ;
+		
+		if (analogValueBrakeRaw > analogValueBrakeMinCalibRaw + ANALOG_SAFETY_OFFSET) // reverse brake
+			brakeCurr = map(analogValueBrakeRaw, analogValueBrakeMinCalibRaw + ANALOG_SAFETY_OFFSET, ANALOG_MAX_RAW, 0, -20);
+		else
+			brakeCurr = 0 ;
+	}
+
 
 #if DEBUG
   Serial.println("throttleRaw = " + (String)analogValueThrottleRaw + " / throttleMinCalibRaw = " + (String)analogValueThrottleMinCalibRaw +
@@ -134,6 +162,7 @@ void loop(void)
   // Call the function setNunchuc kValues to send the current nunchuck values to the VESC
   vescCntrl.nunchuck.valueY = value;
   vescCntrl.setNunchuckValues();
+  vescCntrl.setCurrent(driveCurr);
 }
 
 // ########################## END ##########################
