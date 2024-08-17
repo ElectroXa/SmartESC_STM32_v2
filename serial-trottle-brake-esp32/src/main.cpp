@@ -106,12 +106,24 @@ void loop(void)
 
   // The valueY is used to control the speed, where 127 is the middle = no current
   uint8_t value;
-  if (analogValueBrakeRaw > analogValueBrakeMinCalibRaw + ANALOG_SAFETY_OFFSET)
-    value = map(analogValueBrakeRaw, analogValueBrakeMinCalibRaw + ANALOG_SAFETY_OFFSET, ANALOG_MAX_RAW, 126, 0);
-  else if (analogValueThrottleRaw > analogValueThrottleMinCalibRaw + ANALOG_SAFETY_OFFSET)
-    value = map(analogValueThrottleRaw, analogValueThrottleMinCalibRaw + ANALOG_SAFETY_OFFSET, ANALOG_MAX_RAW, 127, 255);
-  else
-    value = 127;
+  if (PIN_IN_REVERSE==1) // reverse keyswitch engaged
+  {
+    if (analogValueThrottleRaw > (analogValueThrottleMinCalibRaw + ANALOG_SAFETY_OFFSET)){ //reverse throttle 
+      value = map(analogValueThrottleRaw, analogValueThrottleMinCalibRaw + ANALOG_SAFETY_OFFSET, ANALOG_MAX_RAW, 126, 0); //modify if wrong
+    else if (analogValueBrakeRaw > analogValueBrakeMinCalibRaw + ANALOG_SAFETY_OFFSET) // reverse brake
+      value = map(analogValueBrakeRaw, analogValueBrakeMinCalibRaw + ANALOG_SAFETY_OFFSET, ANALOG_MAX_RAW, 127, 255);
+    else
+      value = 127;
+  }
+  else // rev keyswitch on FWD position
+  {
+    if (analogValueBrakeRaw > analogValueBrakeMinCalibRaw + ANALOG_SAFETY_OFFSET)
+      value = map(analogValueBrakeRaw, analogValueBrakeMinCalibRaw + ANALOG_SAFETY_OFFSET, ANALOG_MAX_RAW, 126, 0);
+    else if (analogValueThrottleRaw > analogValueThrottleMinCalibRaw + ANALOG_SAFETY_OFFSET)
+      value = map(analogValueThrottleRaw, analogValueThrottleMinCalibRaw + ANALOG_SAFETY_OFFSET, ANALOG_MAX_RAW, 127, 255);
+    else
+      value = 127;
+  }
 
 #if DEBUG
   Serial.println("throttleRaw = " + (String)analogValueThrottleRaw + " / throttleMinCalibRaw = " + (String)analogValueThrottleMinCalibRaw +
